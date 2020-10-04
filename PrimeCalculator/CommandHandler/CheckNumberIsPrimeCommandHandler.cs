@@ -1,16 +1,30 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Google.Protobuf;
+using PrimeCalculator.CommandHandler.Base;
 using PrimeCalculator.CommandResults;
 using PrimeCalculator.Commands;
+using ScienceInterface.Generated;
 
 namespace PrimeCalculator.CommandHandler
 {
-    public class CheckNumberIsPrimeCommandHandler : IRequestHandler<CheckNumberIsPrimeCommand, CheckNumberIsPrimeCommandResult>
+    public class CheckNumberIsPrimeCommandHandler : AbstractScienceCommandHandler<CheckNumberIsPrimeCommand, CheckNumberIsPrimeCommandResult>
     {
-        public Task<CheckNumberIsPrimeCommandResult> Handle(CheckNumberIsPrimeCommand request, CancellationToken cancellationToken)
+        public async override Task<CheckNumberIsPrimeCommandResult> Handle(CheckNumberIsPrimeCommand request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(new CheckNumberIsPrimeCommandResult { IsPrime = true });
+            var scienceRequestData = new PrimeCalculationRequest
+            {
+                Number = request.Number
+            };
+
+            var scienceReply = await UseScienceInterface("NumberIsPrime", scienceRequestData.ToByteArray(), cancellationToken);
+
+            var scienceResult = NumberIsPrimeResponse.Parser.ParseFrom(scienceReply.RawBytes);
+
+            return new CheckNumberIsPrimeCommandResult
+            {
+                IsPrime = scienceResult.IsPrime
+            };
         }
     }
 }

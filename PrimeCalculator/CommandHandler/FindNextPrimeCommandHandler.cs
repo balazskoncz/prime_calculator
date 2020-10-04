@@ -1,16 +1,30 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using Google.Protobuf;
+using PrimeCalculator.CommandHandler.Base;
 using PrimeCalculator.CommandResults;
 using PrimeCalculator.Commands;
+using ScienceInterface.Generated;
 
 namespace PrimeCalculator.CommandHandler
 {
-    public class FindNextPrimeCommandHandler : IRequestHandler<FindNextPrimeCommand, FindNextPrimeCommandResult>
+    public class FindNextPrimeCommandHandler : AbstractScienceCommandHandler<FindNextPrimeCommand, FindNextPrimeCommandResult>
     {
-        public Task<FindNextPrimeCommandResult> Handle(FindNextPrimeCommand request, CancellationToken cancellationToken)
+        public async override Task<FindNextPrimeCommandResult> Handle(FindNextPrimeCommand request, CancellationToken cancellationToken)
         {
-            return Task.FromResult(new FindNextPrimeCommandResult { NextPrime = 42 });
+            var scienceRequestData = new PrimeCalculationRequest
+            {
+                Number = request.Number
+            };
+
+            var scienceReply = await UseScienceInterface("FindNextPrime", scienceRequestData.ToByteArray(), cancellationToken);
+
+            var scienceResult = NextPrimeResponse.Parser.ParseFrom(scienceReply.RawBytes);
+
+            return new FindNextPrimeCommandResult 
+            { 
+                NextPrime = scienceResult.NextPrime
+            };
         }
     }
 }

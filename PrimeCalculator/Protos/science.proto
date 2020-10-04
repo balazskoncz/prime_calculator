@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package ScienceInterface.Generated;
+
+message PrimeCalculationRequest {
+	int32 number = 1;
+}
+
+message NumberIsPrimeResponse {
+	bool isPrime = 1;
+}
+
+message NextPrimeResponse {
+	int32 nextPrime = 1;
+}
