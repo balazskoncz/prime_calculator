@@ -18,7 +18,7 @@ namespace PrimeCalculator.Controllers
         }
 
         [HttpPost("CheckNumberIsPrime", Name = "CheckNumberIsPrime")]
-        public async Task<ActionResult> CheckNumberIsPrime(CheckNumberDto checkNumberDto) 
+        public async Task<ActionResult<NumberIsPrimeDto>> CheckNumberIsPrime(CheckNumberDto checkNumberDto) 
         {
             var numberIsPrimeResult = await _mediator.Send(
                 new CheckNumberIsPrimeCommand 
@@ -26,11 +26,14 @@ namespace PrimeCalculator.Controllers
                     Number = checkNumberDto.Number
                 });
 
-            return Ok(numberIsPrimeResult.IsPrime);
+            return Ok(new NumberIsPrimeDto
+            {
+                IsPrime = numberIsPrimeResult.IsPrime
+            });
         }
 
         [HttpPost("FindNextPrime", Name = "FindNextPrime")]
-        public async Task<ActionResult> FindNextPrime(CheckNumberDto checkNumberDto)
+        public async Task<ActionResult<NextPrimeDto>> FindNextPrime(CheckNumberDto checkNumberDto)
         {
             var numberIsPrimeResult = await _mediator.Send(
                 new FindNextPrimeCommand
@@ -38,7 +41,10 @@ namespace PrimeCalculator.Controllers
                     Number = checkNumberDto.Number
                 });
 
-            return Ok(numberIsPrimeResult.NextPrime);
+            return Ok(new NextPrimeDto 
+            {
+                NextPrime = numberIsPrimeResult.NextPrime
+            });
         }
     }
 }
