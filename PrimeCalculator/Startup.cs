@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using PrimeCalculator.Repositories;
 
 namespace PrimeCalculator
 {
@@ -29,6 +24,17 @@ namespace PrimeCalculator
             services.AddControllers();
 
             services.AddMediatR(typeof(Startup));
+
+            services.AddScoped<ICalculationRepository, CalculationRepository>();
+
+            var connectionString = "Host=localhost;Port=5432;Database=primes;Username=primes;Password=primes";
+
+            services.AddEntityFrameworkNpgsql()
+                .AddDbContext<PrimeDbContext>(options => options
+                    .UseNpgsql(connectionString, options =>
+                    {
+                        options.MigrationsAssembly(typeof(PrimeDbContext).Assembly.FullName);
+                    }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
