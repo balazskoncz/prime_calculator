@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using PrimeCalculator.Entities;
 using PrimeCalculator.Models;
@@ -9,9 +10,13 @@ namespace PrimeCalculator.Repositories
     public class CalculationRepository : ICalculationRepository
     {
         private readonly PrimeDbContext _primeDbContext;
+        private readonly IMapper _mapper;
 
-        public CalculationRepository(PrimeDbContext primeDbContext)
+        public CalculationRepository(
+            PrimeDbContext primeDbContext,
+            IMapper mapper)
         {
+            _mapper = mapper;
             _primeDbContext = primeDbContext;
         }
 
@@ -26,12 +31,7 @@ namespace PrimeCalculator.Repositories
                 return null;
             }
 
-            return new CalculationModel 
-            {
-                Number = row.Number,
-                CalculationStatusId = row.CalculationStatusId,
-                IsPrime = row.IsPrime
-            };
+            return _mapper.Map<CalculationModel>(row);
         }
 
         public async Task StartNewCalculation(int number)

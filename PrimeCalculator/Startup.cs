@@ -1,3 +1,4 @@
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -5,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using PrimeCalculator.MapperProfiles;
 using PrimeCalculator.Repositories;
 
 namespace PrimeCalculator
@@ -35,6 +37,15 @@ namespace PrimeCalculator
                     {
                         options.MigrationsAssembly(typeof(PrimeDbContext).Assembly.FullName);
                     }));
+
+            var autoMapperConfiguration = new MapperConfiguration(configuration => 
+            {
+                configuration.AddProfile(new CalculationProfile());
+            });
+
+            IMapper mapper = autoMapperConfiguration.CreateMapper();
+            
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

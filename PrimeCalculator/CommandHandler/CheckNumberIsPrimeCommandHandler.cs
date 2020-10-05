@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using Microsoft.AspNetCore.Localization;
 using PrimeCalculator.CommandHandler.Base;
 using PrimeCalculator.CommandResults;
 using PrimeCalculator.Commands;
@@ -27,7 +28,8 @@ namespace PrimeCalculator.CommandHandler
 
             var result = new CheckNumberIsPrimeCommandResult();
 
-            if (calculation == null)
+            if (calculation == null
+                || calculation.CalculationStatusId == CalculationStatus.Failed.StatusId)
             {
                 await _calculationRepository.StartNewCalculation(request.Number);
 
@@ -76,14 +78,36 @@ namespace PrimeCalculator.CommandHandler
                     throw;
                 }
             }
-            else if (calculation.CalculationStatusId == CalculationStatus.Done.StatusId) 
+            else if (calculation.CalculationStatusId == CalculationStatus.Done.StatusId)
             {
                 result.IsPrime = calculation.IsPrime;
 
                 return result;
             }
-            //TODO: check if task is in progress
+            else if (calculation.CalculationStatusId == CalculationStatus.InProgress.StatusId)
+            {
+                //TODO: refactor to appsettings
+                //TODO: use polly for timeout policy
+                TimeSpan checkTime = TimeSpan.FromMinutes(0.25);
 
+                while (true)
+                {
+                    await Task.Delay(checkTime, cancellationToken);
+
+                    var currentState = await _calculationRepository.GetCalculationByNumber(request.Number);
+
+                    if (currentState.CalculationStatusId == CalculationStatus.Done.StatusId)
+                    {
+                        result.IsPrime = currentState.IsPrime;
+                        break;
+                    }
+                }
+            }
+            else 
+            {
+                throw new Exception("Something went wrong please contact support.");
+            }
+            //TODO: check if task is in progress or unknown
 
             return result;
         }
