@@ -1,40 +1,109 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using PrimeCalculator.CommandHandler.Base;
 using PrimeCalculator.CommandResults;
 using PrimeCalculator.Commands;
-using PrimeCalculator.Repositories;
+using PrimeCalculator.Repositories.PrimeLink;
+using PrimeCalculator.TypeSafeEnums;
 using ScienceInterface.Generated;
 
 namespace PrimeCalculator.CommandHandler
 {
     public class FindNextPrimeCommandHandler : AbstractScienceCommandHandler<FindNextPrimeCommand, FindNextPrimeCommandResult>
     {
-        private readonly ICalculationRepository _calculationRepository;
+        private readonly IPrimeLinkRepository _primeLinkRepository;
 
-        public FindNextPrimeCommandHandler(ICalculationRepository calculationRepository)
+        public FindNextPrimeCommandHandler(IPrimeLinkRepository primeLinkRepository)
         {
-            _calculationRepository = calculationRepository;
+            _primeLinkRepository = primeLinkRepository;
         }
 
         public async override Task<FindNextPrimeCommandResult> Handle(FindNextPrimeCommand request, CancellationToken cancellationToken)
         {
-            await _calculationRepository.StartNewCalculation(request.Number);
+            var primeLink = await _primeLinkRepository.GetPrimeLinkbyNumberAsync(request.Number);
 
-            var scienceRequestData = new PrimeCalculationRequest
+            var result = new FindNextPrimeCommandResult();
+
+            if (primeLink == null
+                || primeLink.CalculationStatusId == CalculationStatus.Failed.StatusId)
             {
-                Number = request.Number
-            };
+                try
+                {
+                    await _primeLinkRepository.StartNewPrimeLinkCalculationAsync(request.Number);
 
-            var scienceReply = await UseScienceInterface("FindNextPrime", scienceRequestData.ToByteArray(), cancellationToken);
+                    var scienceRequestData = new PrimeCalculationRequest
+                    {
+                        Number = request.Number
+                    };
 
-            var scienceResult = NextPrimeResponse.Parser.ParseFrom(scienceReply.RawBytes);
+                    var scienceReply = await UseScienceInterface("FindNextPrime", scienceRequestData.ToByteArray(), cancellationToken);
 
-            return new FindNextPrimeCommandResult 
-            { 
-                NextPrime = scienceResult.NextPrime
-            };
+                    var scienceResult = NextPrimeResponse.Parser.ParseFrom(scienceReply.RawBytes);
+
+                    await _primeLinkRepository.UpdatePrimeLinkAsync(new Models.PrimeLinkModel
+                    {
+                        Number = request.Number,
+                        CalculationStatusId = CalculationStatus.Done.StatusId,
+                        NextPrime = scienceResult.NextPrime
+                    });
+
+                    result.NextPrime = scienceResult.NextPrime;
+                }
+                catch (TaskCanceledException taskCanceledException)
+                {
+                    //TODO: log
+                    await _primeLinkRepository.UpdatePrimeLinkAsync(new Models.PrimeLinkModel
+                    {
+                        Number = request.Number,
+                        CalculationStatusId = CalculationStatus.Failed.StatusId,
+                    });
+
+                    throw;
+
+                }
+                catch (Exception exception)
+                {
+                    //TODO: log
+                    await _primeLinkRepository.UpdatePrimeLinkAsync(new Models.PrimeLinkModel
+                    {
+                        Number = request.Number,
+                        CalculationStatusId = CalculationStatus.Unknown.StatusId,
+                    });
+
+                    throw;
+                }
+            }
+            else if (primeLink.CalculationStatusId == CalculationStatus.Done.StatusId)
+            {
+                result.NextPrime = primeLink.NextPrime;
+            }
+            else if (primeLink.CalculationStatusId == CalculationStatus.InProgress.StatusId) 
+            {
+                //TODO: refactor to appsettings
+                //TODO: use polly for timeout policy
+                TimeSpan checkTime = TimeSpan.FromMinutes(0.25);
+
+                while (true)
+                {
+                    await Task.Delay(checkTime, cancellationToken);
+
+                    var currentState = await _primeLinkRepository.GetPrimeLinkbyNumberAsync(request.Number);
+
+                    if (currentState.CalculationStatusId == CalculationStatus.Done.StatusId)
+                    {
+                        result.NextPrime = currentState.NextPrime;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                throw new Exception("Something went wrong please contact support.");
+            }
+
+            return result;
         }
     }
 }
