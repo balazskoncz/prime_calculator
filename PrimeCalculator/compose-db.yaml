@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  pet.db:
+  prime.db:
     image: balazs/myrepo:prime_db
     build:
       context: .

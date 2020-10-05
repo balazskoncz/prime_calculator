@@ -39,16 +39,10 @@ namespace PrimeCalculator
                         options.MigrationsAssembly(typeof(PrimeDbContext).Assembly.FullName);
                     }));
 
-            var autoMapperConfiguration = new MapperConfiguration(configuration => 
-            {
-                configuration.AddProfile(new CalculationProfile());
-            });
-
-            IMapper mapper = autoMapperConfiguration.CreateMapper();
-
             services.AddAutoMapper(configuration =>
             {
                 configuration.AddProfile(new CalculationProfile());
+                configuration.AddProfile(new PrimeLinkProfile());
             });
         }
 

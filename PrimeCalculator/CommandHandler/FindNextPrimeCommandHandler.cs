@@ -31,7 +31,11 @@ namespace PrimeCalculator.CommandHandler
             {
                 try
                 {
-                    await _primeLinkRepository.StartNewPrimeLinkCalculationAsync(request.Number);
+                    if (primeLink == null)
+                    {
+                        await _primeLinkRepository.StartNewPrimeLinkCalculationAsync(request.Number);
+                    }
+
 
                     var scienceRequestData = new PrimeCalculationRequest
                     {

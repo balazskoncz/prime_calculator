@@ -47,7 +47,7 @@ namespace PrimeCalculator.Repositories.PrimeLink
 
         public async Task UpdatePrimeLinkAsync(PrimeLinkModel newPrimeLink)
         {
-            var entity = _mapper.Map<Entities.PrimeLink>(newPrimeLink);
+            var entity = await _primeDbContext.PrimeLinks.FirstOrDefaultAsync(primeLink => primeLink.Number == newPrimeLink.Number);
 
             entity.CalculationStatusId = newPrimeLink.CalculationStatusId;
             entity.NextPrime = newPrimeLink.NextPrime;
