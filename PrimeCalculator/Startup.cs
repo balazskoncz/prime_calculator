@@ -29,8 +29,7 @@ namespace PrimeCalculator
 
             services.AddScoped<ICalculationRepository, CalculationRepository>();
 
-            var connectionString = "Host=localhost;Port=5432;Database=primes;Username=primes;Password=primes";
-
+            var connectionString = string.Format(Configuration["ConnectionStrings:DefaultConnection"]);
             services.AddEntityFrameworkNpgsql()
                 .AddDbContext<PrimeDbContext>(options => options
                     .UseNpgsql(connectionString, options =>
@@ -44,8 +43,11 @@ namespace PrimeCalculator
             });
 
             IMapper mapper = autoMapperConfiguration.CreateMapper();
-            
-            services.AddSingleton(mapper);
+
+            services.AddAutoMapper(configuration =>
+            {
+                configuration.AddProfile(new CalculationProfile());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
