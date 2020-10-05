@@ -38,7 +38,7 @@ namespace PrimeCalculator.Migrations
 
             modelBuilder.Entity("PrimeCalculator.Entities.PrimeLink", b =>
                 {
-                    b.Property<int>("Prime")
+                    b.Property<int>("Number")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -49,7 +49,7 @@ namespace PrimeCalculator.Migrations
                     b.Property<int>("NextPrime")
                         .HasColumnType("integer");
 
-                    b.HasKey("Prime");
+                    b.HasKey("Number");
 
                     b.ToTable("PrimeLink","primes");
                 });

@@ -9,8 +9,8 @@ using PrimeCalculator;
 namespace PrimeCalculator.Migrations
 {
     [DbContext(typeof(PrimeDbContext))]
-    [Migration("20201004175828_InitMigration")]
-    partial class InitMigration
+    [Migration("20201005165632_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -40,7 +40,7 @@ namespace PrimeCalculator.Migrations
 
             modelBuilder.Entity("PrimeCalculator.Entities.PrimeLink", b =>
                 {
-                    b.Property<int>("Prime")
+                    b.Property<int>("Number")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -51,7 +51,7 @@ namespace PrimeCalculator.Migrations
                     b.Property<int>("NextPrime")
                         .HasColumnType("integer");
 
-                    b.HasKey("Prime");
+                    b.HasKey("Number");
 
                     b.ToTable("PrimeLink","primes");
                 });

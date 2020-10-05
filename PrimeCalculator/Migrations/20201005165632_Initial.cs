@@ -3,7 +3,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace PrimeCalculator.Migrations
 {
-    public partial class InitMigration : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -30,14 +30,14 @@ namespace PrimeCalculator.Migrations
                 schema: "primes",
                 columns: table => new
                 {
-                    Prime = table.Column<int>(nullable: false)
+                    Number = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CalculationStatusId = table.Column<int>(nullable: false),
                     NextPrime = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PrimeLink", x => x.Prime);
+                    table.PrimaryKey("PK_PrimeLink", x => x.Number);
                 });
         }
 

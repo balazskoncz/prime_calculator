@@ -10,7 +10,7 @@ namespace PrimeCalculator.SchemaDefinitions
         {
             builder.ToTable("PrimeLink", PrimeDbContext.DEFAULT_SCHEMA);
 
-            builder.HasKey(primeLink => primeLink.Prime);
+            builder.HasKey(primeLink => primeLink.Number);
 
             builder.Property(primeLink => primeLink.CalculationStatusId).IsRequired();
         }

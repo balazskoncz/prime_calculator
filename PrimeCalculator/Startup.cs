@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PrimeCalculator.MapperProfiles;
 using PrimeCalculator.Repositories;
+using PrimeCalculator.Repositories.PrimeLink;
 
 namespace PrimeCalculator
 {
@@ -28,6 +29,7 @@ namespace PrimeCalculator
             services.AddMediatR(typeof(Startup));
 
             services.AddScoped<ICalculationRepository, CalculationRepository>();
+            services.AddScoped<IPrimeLinkRepository, PrimeLinkRepository>();
 
             var connectionString = string.Format(Configuration["ConnectionStrings:DefaultConnection"]);
             services.AddEntityFrameworkNpgsql()

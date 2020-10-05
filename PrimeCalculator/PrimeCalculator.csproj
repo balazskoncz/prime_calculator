@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20201004175828_InitMigration.cs" />
+    <Compile Remove="Migrations\20201004175828_InitMigration.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Protos\science.proto" />
   </ItemGroup>
 

@@ -1,6 +1,6 @@
-﻿namespace PrimeCalculator.Entities
+﻿namespace PrimeCalculator.Models
 {
-    public class PrimeLink
+    public class PrimeLinkModel
     {
         public int Number { get; set; }
 
