@@ -30,6 +30,7 @@ namespace PrimeCalculator.Controllers
 
         [HttpPost("CheckNumberIsPrime", Name = "CheckNumberIsPrime")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(NumberIsPrimeDto))]
+        [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<NumberIsPrimeDto>> CheckNumberIsPrime(CheckNumberDto checkNumberDto) 
         {
             var numberIsPrimeResult = await _mediator.Send(
@@ -46,6 +47,7 @@ namespace PrimeCalculator.Controllers
 
         [HttpPost("FindNextPrime", Name = "FindNextPrime")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(NextPrimeDto))]
+        [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<NextPrimeDto>> FindNextPrime(CheckNumberDto checkNumberDto)
         {
             var numberIsPrimeResult = await _mediator.Send(
@@ -63,6 +65,7 @@ namespace PrimeCalculator.Controllers
         [HttpPost("RequestPrimeCalculation", Name = "RequestPrimeCalculation")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LinkDto))]
         [Links(Policy = "GetCalculationStatePolicy")]
+        [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<LinkDto>> RequestPrimeCalculation(CheckNumberDto checkNumberDto) 
         {
             await Task.Run(() =>
@@ -83,6 +86,7 @@ namespace PrimeCalculator.Controllers
         [HttpGet("GetCalculationState/{number:int}", Name = "GetCalculationState")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CalculationDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<CalculationDto>> GetCalculationState(int number)
         {
             var calculation = await _mediator.Send(new GetCalculationStateByNumberQuery { Number = number });
@@ -98,6 +102,7 @@ namespace PrimeCalculator.Controllers
         [HttpPost("RequestNextPrimeCalculation", Name = "RequestNextPrimeCalculation")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LinkDto))]
         [Links(Policy = "GetPrimeLinkStatePolicy")]
+        [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<LinkDto>> RequestNextPrimeCalculation(CheckNumberDto checkNumberDto)
         {
             await Task.Run(() =>
@@ -118,6 +123,7 @@ namespace PrimeCalculator.Controllers
         [HttpGet("GetPrimeLink/{number:int}", Name = "GetPrimeLink")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PrimeLinkDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<PrimeLinkDto>> GetPrimeLink(int number) 
         {
             var primeLink = await _mediator.Send(new GetPrimeLinkByNumberQuery { Number = number });
