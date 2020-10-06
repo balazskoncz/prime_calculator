@@ -6,6 +6,10 @@ from resources.number_is_prime import NumberIsPrime
 
 app = Flask(__name__)
 
+@app.route("/info", methods=['GET'])
+def info():
+    return "science service is up and running"
+
 api = Api(app)
 api.add_resource(NumberIsPrime, "/NumberIsPrime")
 api.add_resource(FindNextPrime, "/FindNextPrime")
