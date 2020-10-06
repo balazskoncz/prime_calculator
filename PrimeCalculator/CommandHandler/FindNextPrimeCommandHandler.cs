@@ -2,25 +2,27 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using MediatR;
 using PrimeCalculator.CommandHandler.Base;
 using PrimeCalculator.CommandResults;
 using PrimeCalculator.Commands;
+using PrimeCalculator.Helpers;
 using PrimeCalculator.Repositories.PrimeLink;
 using PrimeCalculator.TypeSafeEnums;
 using ScienceInterface.Generated;
 
 namespace PrimeCalculator.CommandHandler
 {
-    public class FindNextPrimeCommandHandler : AbstractScienceCommandHandler<FindNextPrimeCommand, FindNextPrimeCommandResult>
+    public class FindNextPrimeCommandHandler : AbstractScienceCommandHandler, IRequestHandler<FindNextPrimeCommand, FindNextPrimeCommandResult>
     {
         private readonly IPrimeLinkRepository _primeLinkRepository;
 
-        public FindNextPrimeCommandHandler(IPrimeLinkRepository primeLinkRepository)
+        public FindNextPrimeCommandHandler(IPrimeLinkRepository primeLinkRepository, ConnectionStrings connectionStrings): base(connectionStrings)
         {
             _primeLinkRepository = primeLinkRepository;
         }
 
-        public async override Task<FindNextPrimeCommandResult> Handle(FindNextPrimeCommand request, CancellationToken cancellationToken)
+        public async Task<FindNextPrimeCommandResult> Handle(FindNextPrimeCommand request, CancellationToken cancellationToken)
         {
             var primeLink = await _primeLinkRepository.GetPrimeLinkbyNumberAsync(request.Number);
 

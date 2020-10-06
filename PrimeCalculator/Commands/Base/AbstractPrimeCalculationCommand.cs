@@ -2,8 +2,7 @@
 
 namespace PrimeCalculator.Commands.Base
 {
-    public abstract class AbstractPrimeCalculationCommand<TCommandResult> : IRequest<TCommandResult>
+    public abstract class AbstractPrimeCalculationCommand<TCommandResult> : AbstractNumericCommand, IRequest<TCommandResult>
     {
-        public int Number { get; set; }
     }
 }

@@ -1,18 +1,23 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using PrimeCalculator.Helpers;
 using RestSharp;
 
 namespace PrimeCalculator.CommandHandler.Base
 {
-    public abstract class AbstractScienceCommandHandler<TCommand, TResponse> : IRequestHandler<TCommand, TResponse>
-     where TCommand : IRequest<TResponse>
+    public abstract class AbstractScienceCommandHandler
     {
-        public abstract Task<TResponse> Handle(TCommand request, CancellationToken cancellationToken);
+        private ConnectionStrings _connectionStrings;
+
+        public AbstractScienceCommandHandler(ConnectionStrings connectionStrings)
+        {
+            _connectionStrings = connectionStrings;
+        }
 
         protected async Task<IRestResponse> UseScienceInterface(string interfaceName, byte[] data, CancellationToken cancellationToken) 
         {
-            var client = new RestClient("http://localhost:5010");
+            var client = new RestClient(_connectionStrings.ScienceConnection);
+
             var request = new RestRequest(interfaceName, Method.POST);
 
             request.AddFile("protomessage", data, "data");
