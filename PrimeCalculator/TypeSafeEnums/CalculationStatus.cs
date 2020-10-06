@@ -22,6 +22,16 @@ namespace PrimeCalculator.TypeSafeEnums
             StatusName = statusName;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is CalculationStatus calculationStatus)
+            {
+                return calculationStatus.StatusId == StatusId;
+            }
+
+            return false;
+        }
+
         public static CalculationStatus GetStatusFromId(int statusId)
         {
             return statusId switch
