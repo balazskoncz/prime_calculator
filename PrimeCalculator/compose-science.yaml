@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  prime.science:
+    image: prime_science
+    build:
+      context: ./Science
+      dockerfile: Dockerfile
+    ports:
+      - '5010:5010'
+volumes:
+  postgres:
+  archive:
+  temp:
+  data:
+  node_modules:
