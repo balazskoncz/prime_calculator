@@ -68,6 +68,13 @@ namespace PrimeCalculator
                         .RequireRoutedLink("location", nameof(PrimeController.GetCalculationState), x => new { number = x.Id });
                 });
             });
+
+            services.AddOpenApiDocument(settings => 
+            {
+                settings.Title = "Prime API";
+                settings.DocumentName = "v1";
+                settings.Version = "v1";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -94,6 +101,9 @@ namespace PrimeCalculator
             {
                 endpoints.MapControllers();
             });
+
+            app.UseOpenApi()
+               .UseSwaggerUi3();
         }
     }
 }

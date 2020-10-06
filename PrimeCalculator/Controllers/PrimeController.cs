@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PrimeCalculator.Commands;
 using PrimeCalculator.Dtos;
@@ -28,6 +29,7 @@ namespace PrimeCalculator.Controllers
         }
 
         [HttpPost("CheckNumberIsPrime", Name = "CheckNumberIsPrime")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(NumberIsPrimeDto))]
         public async Task<ActionResult<NumberIsPrimeDto>> CheckNumberIsPrime(CheckNumberDto checkNumberDto) 
         {
             var numberIsPrimeResult = await _mediator.Send(
@@ -43,6 +45,7 @@ namespace PrimeCalculator.Controllers
         }
 
         [HttpPost("FindNextPrime", Name = "FindNextPrime")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(NextPrimeDto))]
         public async Task<ActionResult<NextPrimeDto>> FindNextPrime(CheckNumberDto checkNumberDto)
         {
             var numberIsPrimeResult = await _mediator.Send(
@@ -58,8 +61,9 @@ namespace PrimeCalculator.Controllers
         }
 
         [HttpPost("RequestPrimeCalculation", Name = "RequestPrimeCalculation")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LinkDto))]
         [Links(Policy = "GetCalculationStatePolicy")]
-        public async Task<ActionResult> RequestPrimeCalculation(CheckNumberDto checkNumberDto) 
+        public async Task<ActionResult<LinkDto>> RequestPrimeCalculation(CheckNumberDto checkNumberDto) 
         {
             await Task.Run(() =>
             {
@@ -77,7 +81,9 @@ namespace PrimeCalculator.Controllers
         }
 
         [HttpGet("GetCalculationState/{number:int}", Name = "GetCalculationState")]
-        public async Task<ActionResult> GetCalculationState(int number)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CalculationDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<CalculationDto>> GetCalculationState(int number)
         {
             var calculation = await _mediator.Send(new GetCalculationStatesByNumberQuery { Number = number });
 
