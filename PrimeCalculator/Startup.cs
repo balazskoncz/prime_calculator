@@ -67,6 +67,12 @@ namespace PrimeCalculator
                         .RequireSelfLink()
                         .RequireRoutedLink("location", nameof(PrimeController.GetCalculationState), x => new { number = x.Id });
                 });
+                configure.AddPolicy<LinkDto>("GetPrimeLinkStatePolicy", policy =>
+                {
+                    policy
+                        .RequireSelfLink()
+                        .RequireRoutedLink("location", nameof(PrimeController.GetPrimeLink), x => new { number = x.Id });
+                });
             });
 
             services.AddOpenApiDocument(settings => 

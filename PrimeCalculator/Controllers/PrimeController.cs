@@ -85,7 +85,7 @@ namespace PrimeCalculator.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CalculationDto>> GetCalculationState(int number)
         {
-            var calculation = await _mediator.Send(new GetCalculationStatesByNumberQuery { Number = number });
+            var calculation = await _mediator.Send(new GetCalculationStateByNumberQuery { Number = number });
 
             if (calculation == null)
             {
@@ -93,6 +93,41 @@ namespace PrimeCalculator.Controllers
             }
 
             return Ok(_mapper.Map<CalculationDto>(calculation));
+        }
+
+        [HttpPost("RequestNextPrimeCalculation", Name = "RequestNextPrimeCalculation")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LinkDto))]
+        [Links(Policy = "GetPrimeLinkStatePolicy")]
+        public async Task<ActionResult<LinkDto>> RequestNextPrimeCalculation(CheckNumberDto checkNumberDto)
+        {
+            await Task.Run(() =>
+            {
+                var command = _mediator.Send(new StartNextPrimeCalculationCommand
+                {
+                    Number = checkNumberDto.Number
+                });
+            });
+
+            var linkDto = new LinkDto { Id = checkNumberDto.Number.ToString() };
+
+            await _linksService.AddLinksAsync(linkDto);
+
+            return Ok(linkDto);
+        }
+
+        [HttpGet("GetPrimeLink/{number:int}", Name = "GetPrimeLink")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PrimeLinkDto))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<PrimeLinkDto>> GetPrimeLink(int number) 
+        {
+            var primeLink = await _mediator.Send(new GetPrimeLinkByNumberQuery { Number = number });
+
+            if (primeLink == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(_mapper.Map<PrimeLinkDto>(primeLink));
         }
     }
 }

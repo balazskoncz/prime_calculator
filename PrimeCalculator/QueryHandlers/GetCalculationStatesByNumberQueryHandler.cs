@@ -8,7 +8,7 @@ using PrimeCalculator.Repositories;
 
 namespace PrimeCalculator.QueryHandlers
 {
-    public class GetCalculationStatesByNumberQueryHandler : IRequestHandler<GetCalculationStatesByNumberQuery, CalculationModel>
+    public class GetCalculationStatesByNumberQueryHandler : IRequestHandler<GetCalculationStateByNumberQuery, CalculationModel>
     {
         private readonly ICalculationRepository _calculationRepository;
         private readonly IMapper _mapper;
@@ -21,7 +21,7 @@ namespace PrimeCalculator.QueryHandlers
             _calculationRepository = calculationRepository;
         }
 
-        public async Task<CalculationModel> Handle(GetCalculationStatesByNumberQuery request, CancellationToken cancellationToken)
+        public async Task<CalculationModel> Handle(GetCalculationStateByNumberQuery request, CancellationToken cancellationToken)
         {
             var calculation = await _calculationRepository.GetCalculationByNumberAsync(request.Number);
 

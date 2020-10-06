@@ -1,13 +1,13 @@
 ﻿using PrimeCalculator.TypeSafeEnums;
 
-namespace PrimeCalculator.Models
+namespace PrimeCalculator.Dtos
 {
-    public class PrimeLinkModel
+    public class PrimeLinkDto
     {
         public int Number { get; set; }
 
         public CalculationStatus CalculationStatus { get; set; }
 
-        public int NextPrime { get; set; }
+        public int? NextPrime { get; set; }
     }
 }

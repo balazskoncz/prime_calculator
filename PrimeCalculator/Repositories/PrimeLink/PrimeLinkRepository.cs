@@ -49,7 +49,7 @@ namespace PrimeCalculator.Repositories.PrimeLink
         {
             var entity = await _primeDbContext.PrimeLinks.FirstOrDefaultAsync(primeLink => primeLink.Number == newPrimeLink.Number);
 
-            entity.CalculationStatusId = newPrimeLink.CalculationStatusId;
+            entity.CalculationStatusId = newPrimeLink.CalculationStatus.StatusId;
             entity.NextPrime = newPrimeLink.NextPrime;
 
             await _primeDbContext.SaveChangesAsync();

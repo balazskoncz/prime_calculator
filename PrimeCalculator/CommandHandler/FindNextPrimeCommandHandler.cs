@@ -29,7 +29,7 @@ namespace PrimeCalculator.CommandHandler
             var result = new FindNextPrimeCommandResult();
 
             if (primeLink == null
-                || primeLink.CalculationStatusId == CalculationStatus.Failed.StatusId)
+                || primeLink.CalculationStatus == CalculationStatus.Failed)
             {
                 try
                 {
@@ -37,7 +37,6 @@ namespace PrimeCalculator.CommandHandler
                     {
                         await _primeLinkRepository.StartNewPrimeLinkCalculationAsync(request.Number);
                     }
-
 
                     var scienceRequestData = new PrimeCalculationRequest
                     {
@@ -51,7 +50,7 @@ namespace PrimeCalculator.CommandHandler
                     await _primeLinkRepository.UpdatePrimeLinkAsync(new Models.PrimeLinkModel
                     {
                         Number = request.Number,
-                        CalculationStatusId = CalculationStatus.Done.StatusId,
+                        CalculationStatus = CalculationStatus.Done,
                         NextPrime = scienceResult.NextPrime
                     });
 
@@ -63,7 +62,7 @@ namespace PrimeCalculator.CommandHandler
                     await _primeLinkRepository.UpdatePrimeLinkAsync(new Models.PrimeLinkModel
                     {
                         Number = request.Number,
-                        CalculationStatusId = CalculationStatus.Failed.StatusId,
+                        CalculationStatus = CalculationStatus.Failed,
                     });
 
                     throw;
@@ -75,17 +74,17 @@ namespace PrimeCalculator.CommandHandler
                     await _primeLinkRepository.UpdatePrimeLinkAsync(new Models.PrimeLinkModel
                     {
                         Number = request.Number,
-                        CalculationStatusId = CalculationStatus.Unknown.StatusId,
+                        CalculationStatus = CalculationStatus.Unknown,
                     });
 
                     throw;
                 }
             }
-            else if (primeLink.CalculationStatusId == CalculationStatus.Done.StatusId)
+            else if (primeLink.CalculationStatus == CalculationStatus.Done)
             {
                 result.NextPrime = primeLink.NextPrime;
             }
-            else if (primeLink.CalculationStatusId == CalculationStatus.InProgress.StatusId) 
+            else if (primeLink.CalculationStatus == CalculationStatus.InProgress) 
             {
                 //TODO: refactor to appsettings
                 //TODO: use polly for timeout policy
@@ -97,7 +96,7 @@ namespace PrimeCalculator.CommandHandler
 
                     var currentState = await _primeLinkRepository.GetPrimeLinkbyNumberAsync(request.Number);
 
-                    if (currentState.CalculationStatusId == CalculationStatus.Done.StatusId)
+                    if (currentState.CalculationStatus == CalculationStatus.Done)
                     {
                         result.NextPrime = currentState.NextPrime;
                         break;

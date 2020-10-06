@@ -4,7 +4,7 @@ using PrimeCalculator.Queries.Base;
 
 namespace PrimeCalculator.Queries
 {
-    public class GetCalculationStatesByNumberQuery : AbstractNumericQuery, IRequest<CalculationModel>
+    public class GetCalculationStateByNumberQuery : AbstractNumericQuery, IRequest<CalculationModel>
     {
     }
 }
