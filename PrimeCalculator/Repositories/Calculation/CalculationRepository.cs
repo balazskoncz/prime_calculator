@@ -20,11 +20,10 @@ namespace PrimeCalculator.Repositories
             _primeDbContext = primeDbContext;
         }
 
-        public async Task<CalculationModel> GetCalculationByNumber(int number)
+        public async Task<CalculationModel> GetCalculationByNumberAsync(int number)
         {
             var row = await _primeDbContext.Calculations.AsNoTracking().FirstOrDefaultAsync(
-                calculation => calculation.Number == number
-                && calculation.CalculationStatusId == CalculationStatus.Done.StatusId);
+                calculation => calculation.Number == number);
 
             if (row == null)
             {
@@ -34,7 +33,7 @@ namespace PrimeCalculator.Repositories
             return _mapper.Map<CalculationModel>(row);
         }
 
-        public async Task StartNewCalculation(int number)
+        public async Task StartNewCalculationAsync(int number)
         {
             var entity = new Calculation
             {
@@ -46,7 +45,7 @@ namespace PrimeCalculator.Repositories
             await _primeDbContext.SaveChangesAsync();
         }
 
-        public async Task UpdateCalculation(CalculationModel newCalculation)
+        public async Task UpdateCalculationAsync(CalculationModel newCalculation)
         {
             var row = await _primeDbContext.Calculations.FirstOrDefaultAsync(
                 calculation => calculation.Number == newCalculation.Number);
@@ -57,7 +56,7 @@ namespace PrimeCalculator.Repositories
             }
 
             row.IsPrime = newCalculation.IsPrime;
-            row.CalculationStatusId = newCalculation.CalculationStatusId;
+            row.CalculationStatusId = newCalculation.CalculationStatus.StatusId;
 
             await _primeDbContext.SaveChangesAsync();
         }

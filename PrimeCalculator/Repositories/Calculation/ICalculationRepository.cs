@@ -5,8 +5,8 @@ namespace PrimeCalculator.Repositories
 {
     public interface ICalculationRepository
     {
-        Task<CalculationModel> GetCalculationByNumber(int number);
-        Task StartNewCalculation(int number);
-        Task UpdateCalculation(CalculationModel newCalculation);
+        Task<CalculationModel> GetCalculationByNumberAsync(int number);
+        Task StartNewCalculationAsync(int number);
+        Task UpdateCalculationAsync(CalculationModel newCalculation);
     }
 }
