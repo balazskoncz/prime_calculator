@@ -32,9 +32,23 @@ namespace PrimeCalculator
 
         public IConfiguration Configuration { get; }
 
+        readonly string AllowAllPolicy = "AllowAll";
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+             services.AddCors(options =>
+             {
+                 options.AddPolicy(name: AllowAllPolicy,
+                     builder =>
+                     {
+                         builder.AllowAnyOrigin();
+                         builder.AllowAnyMethod();
+                         builder.AllowAnyHeader();
+                         builder.AllowCredentials();
+                     });
+             });
+
             services.AddControllers();
 
             services.AddMediatR(typeof(Startup));
@@ -109,6 +123,8 @@ namespace PrimeCalculator
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCors(AllowAllPolicy);
 
             app.UseHttpsRedirection();
 
