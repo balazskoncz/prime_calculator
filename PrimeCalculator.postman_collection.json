@@ -1,0 +1,168 @@
+{
+	"info": {
+		"_postman_id": "b763f01a-5339-456f-80bb-8c761572cee7",
+		"name": "PrimeCalculator",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "CheckNumberIsPrime",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Number\" : 991 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/Prime/CheckNumberIsPrime",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"Prime",
+						"CheckNumberIsPrime"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FindNextPrime",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Number\" : 167675119 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/Prime/FindNextPrime",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"Prime",
+						"FindNextPrime"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RequestPrimeCalculation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Number\" : 441 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/Prime/RequestPrimeCalculation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"Prime",
+						"RequestPrimeCalculation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RequestNextPrimeCalculation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Number\" : 13 }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/Prime/RequestNextPrimeCalculation",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"Prime",
+						"RequestNextPrimeCalculation"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetCalculationState",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/Prime/GetCalculationState/441",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"Prime",
+						"GetCalculationState",
+						"441"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetPrimeLink",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/Prime/GetPrimeLink/66",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"Prime",
+						"GetPrimeLink",
+						"66"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
