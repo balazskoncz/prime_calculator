@@ -11,4 +11,4 @@ The swagger is available via:
 http://localhost:5000/swagger/index.html
 
 For a typical start use docker-compose:
-docker-compose -f .\compose-service.yaml up
+"docker-compose -f .\compose-service.yaml up"
