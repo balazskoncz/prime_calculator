@@ -11,6 +11,7 @@ using Polly.CircuitBreaker;
 using PrimeCalculator.Commands;
 using PrimeCalculator.Dtos;
 using PrimeCalculator.Helpers;
+using PrimeCalculator.Logging;
 using PrimeCalculator.Queries;
 using RiskFirst.Hateoas;
 
@@ -23,18 +24,21 @@ namespace PrimeCalculator.Controllers
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
         private readonly ILinksService _linksService;
-        private readonly AsyncCircuitBreakerPolicy _circuitBreakerPolicy;
+        private readonly ILoggingManager _loggingManager;
         private readonly PolicyConfiguration _policyConfiguration;
+        private readonly AsyncCircuitBreakerPolicy _circuitBreakerPolicy;
 
         public PrimeController(
             IMapper mapper,
             IMediator mediator,
             ILinksService linksService,
+            ILoggingManager loggingManager,
             PolicyConfiguration policyConfiguration)
         {
             _mapper = mapper;
             _mediator = mediator;
             _linksService = linksService;
+            _loggingManager = loggingManager;
             _policyConfiguration = policyConfiguration;
 
             _circuitBreakerPolicy = Policy
@@ -42,11 +46,11 @@ namespace PrimeCalculator.Controllers
                   .CircuitBreakerAsync(policyConfiguration.CircuitBreakerAllowedExceptions, TimeSpan.FromMinutes(_policyConfiguration.CircuitBreakerShutdownDurationInMinutes),
                   (ex, t) =>
                   {
-                      Console.WriteLine("Circuit broken!");
+                      _loggingManager.LogFatal("Circuit broken!");
                   },
                   () =>
                   {
-                      Console.WriteLine("Circuit Reset!");
+                      _loggingManager.LogInformation("Circuit Reset!");
                   });
         }
 
@@ -57,6 +61,8 @@ namespace PrimeCalculator.Controllers
         [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<NumberIsPrimeDto>> CheckNumberIsPrime(CheckNumberDto checkNumberDto) 
         {
+            _loggingManager.LogInformation($"CheckNumberIsPrime endpoint started. number: {checkNumberDto.Number}");
+
             try
             {
                 bool isPrimeResult = false;
@@ -82,6 +88,8 @@ namespace PrimeCalculator.Controllers
             }
             catch (TaskCanceledException taskCanceledException)
             {
+                _loggingManager.LogError(taskCanceledException.Message);
+
                 return Problem(
                     title: "The computation runs too long. Please check back later or use a HATEOAS enabled endpoint.",
                     detail: taskCanceledException.Message,
@@ -89,6 +97,8 @@ namespace PrimeCalculator.Controllers
             }
             catch (Exception exception)
             {
+                _loggingManager.LogError(exception.Message);
+
                 return Problem(
                     title: "Unexpected error. Please contact support.",
                     detail: exception.Message,
@@ -103,6 +113,8 @@ namespace PrimeCalculator.Controllers
         [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<NextPrimeDto>> FindNextPrime(CheckNumberDto checkNumberDto)
         {
+            _loggingManager.LogInformation($"FindNextPrime endpoint started. number: {checkNumberDto.Number}");
+
             try
             {
                 int nextPrime = -1;
@@ -129,6 +141,8 @@ namespace PrimeCalculator.Controllers
             }
             catch (TaskCanceledException taskCanceledException)
             {
+                _loggingManager.LogError(taskCanceledException.Message);
+
                 return Problem(
                     title: "The computation runs too long. Please check back later or use a HATEOAS enabled endpoint.",
                     detail: taskCanceledException.Message,
@@ -136,6 +150,8 @@ namespace PrimeCalculator.Controllers
             }
             catch (Exception exception)
             {
+                _loggingManager.LogError(exception.Message);
+
                 return Problem(
                     title: "Unexpected error. Please contact support.",
                     detail: exception.Message,
@@ -149,6 +165,8 @@ namespace PrimeCalculator.Controllers
         [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<LinkDto>> RequestPrimeCalculation(CheckNumberDto checkNumberDto) 
         {
+            _loggingManager.LogInformation($"RequestPrimeCalculation endpoint started. number: {checkNumberDto.Number}");
+
             await Task.Run(() =>
             {
                 var command = _mediator.Send(new StartPrimeCalculationCommand
@@ -170,6 +188,8 @@ namespace PrimeCalculator.Controllers
         [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<CalculationDto>> GetCalculationState(int number)
         {
+            _loggingManager.LogInformation($"GetCalculationState endpoint started. number: {number}");
+
             var calculation = await _mediator.Send(new GetCalculationStateByNumberQuery { Number = number });
 
             if (calculation == null)
@@ -186,6 +206,8 @@ namespace PrimeCalculator.Controllers
         [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<LinkDto>> RequestNextPrimeCalculation(CheckNumberDto checkNumberDto)
         {
+            _loggingManager.LogInformation($"RequestNextPrimeCalculation endpoint started. number: {checkNumberDto.Number}");
+
             await Task.Run(() =>
             {
                 var command = _mediator.Send(new StartNextPrimeCalculationCommand
@@ -207,6 +229,8 @@ namespace PrimeCalculator.Controllers
         [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<PrimeLinkDto>> GetPrimeLink(int number) 
         {
+            _loggingManager.LogInformation($"GetPrimeLink endpoint started. number: {number}");
+
             var primeLink = await _mediator.Send(new GetPrimeLinkByNumberQuery { Number = number });
 
             if (primeLink == null)

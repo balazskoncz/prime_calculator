@@ -7,6 +7,7 @@ using PrimeCalculator.CommandHandler.Base;
 using PrimeCalculator.CommandResults;
 using PrimeCalculator.Commands;
 using PrimeCalculator.Helpers;
+using PrimeCalculator.Logging;
 using PrimeCalculator.Models;
 using PrimeCalculator.Repositories;
 using PrimeCalculator.TypeSafeEnums;
@@ -17,9 +18,14 @@ namespace PrimeCalculator.CommandHandler
     public class CheckNumberIsPrimeCommandHandler : AbstractScienceCommandHandler, IRequestHandler<CheckNumberIsPrimeCommand, CheckNumberIsPrimeCommandResult>
     {
         private readonly ICalculationRepository _calculationRepository;
+        private readonly ILoggingManager _loggingManager;
 
-        public CheckNumberIsPrimeCommandHandler(ICalculationRepository calculationRepository, ConnectionStrings connectionStrings): base(connectionStrings)
+        public CheckNumberIsPrimeCommandHandler(
+            ILoggingManager loggingManager,
+            ICalculationRepository calculationRepository,
+            ConnectionStrings connectionStrings): base(connectionStrings)
         {
+            _loggingManager = loggingManager;
             _calculationRepository = calculationRepository;
         }
 
@@ -59,7 +65,7 @@ namespace PrimeCalculator.CommandHandler
                 }
                 catch (TaskCanceledException taskCanceledException)
                 {
-                    //TODO: log
+                    _loggingManager.LogFatal(taskCanceledException.Message);
 
                     await _calculationRepository.UpdateCalculationAsync(new CalculationModel
                     {
@@ -71,7 +77,7 @@ namespace PrimeCalculator.CommandHandler
                 }
                 catch (Exception exception)
                 {
-                    //TODO: log
+                    _loggingManager.LogError(exception.Message);
 
                     await _calculationRepository.UpdateCalculationAsync(new CalculationModel
                     {

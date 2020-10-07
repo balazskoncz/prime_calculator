@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PrimeCalculator.BackgroundServices.HostedService;
 using PrimeCalculator.BackgroundServices.Queue;
@@ -16,6 +17,7 @@ using PrimeCalculator.Controllers;
 using PrimeCalculator.Dtos;
 using PrimeCalculator.HealthChecks;
 using PrimeCalculator.Helpers;
+using PrimeCalculator.Logging;
 using PrimeCalculator.MapperProfiles;
 using PrimeCalculator.Repositories;
 using PrimeCalculator.Repositories.PrimeLink;
@@ -48,12 +50,15 @@ namespace PrimeCalculator
                      });
              });
 
+            services.AddResponseCaching();
+
             services.AddControllers();
 
             services.AddMediatR(typeof(Startup));
 
             services.AddScoped<ICalculationRepository, CalculationRepository>();
             services.AddScoped<IPrimeLinkRepository, PrimeLinkRepository>();
+            services.AddScoped<ILoggingManager, LoggingManager>();
 
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddHostedService<QueuedHostedService>();
@@ -67,6 +72,7 @@ namespace PrimeCalculator
             services.AddSingleton(connectionStrings);
             services.AddSingleton(policyConfigurations);
 
+            
             var connectionString = string.Format(Configuration["ConnectionStrings:DatabaseConnection"]);
             services.AddEntityFrameworkNpgsql()
                 .AddDbContext<PrimeDbContext>(options => options
@@ -110,7 +116,7 @@ namespace PrimeCalculator
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
@@ -118,10 +124,14 @@ namespace PrimeCalculator
                 context.Database.EnsureCreated();
             }
 
+            
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            loggerFactory.AddLog4Net();
 
             app.UseCors(AllowAllPolicy);
 

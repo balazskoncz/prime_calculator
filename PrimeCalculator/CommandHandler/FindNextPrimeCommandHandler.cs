@@ -7,6 +7,7 @@ using PrimeCalculator.CommandHandler.Base;
 using PrimeCalculator.CommandResults;
 using PrimeCalculator.Commands;
 using PrimeCalculator.Helpers;
+using PrimeCalculator.Logging;
 using PrimeCalculator.Repositories.PrimeLink;
 using PrimeCalculator.TypeSafeEnums;
 using ScienceInterface.Generated;
@@ -16,9 +17,14 @@ namespace PrimeCalculator.CommandHandler
     public class FindNextPrimeCommandHandler : AbstractScienceCommandHandler, IRequestHandler<FindNextPrimeCommand, FindNextPrimeCommandResult>
     {
         private readonly IPrimeLinkRepository _primeLinkRepository;
+        private readonly ILoggingManager _loggingManager;
 
-        public FindNextPrimeCommandHandler(IPrimeLinkRepository primeLinkRepository, ConnectionStrings connectionStrings): base(connectionStrings)
+        public FindNextPrimeCommandHandler(
+            ILoggingManager loggingManager,
+            IPrimeLinkRepository primeLinkRepository,
+            ConnectionStrings connectionStrings): base(connectionStrings)
         {
+            _loggingManager = loggingManager;
             _primeLinkRepository = primeLinkRepository;
         }
 
@@ -58,7 +64,8 @@ namespace PrimeCalculator.CommandHandler
                 }
                 catch (TaskCanceledException taskCanceledException)
                 {
-                    //TODO: log
+                    _loggingManager.LogFatal(taskCanceledException.Message);
+
                     await _primeLinkRepository.UpdatePrimeLinkAsync(new Models.PrimeLinkModel
                     {
                         Number = request.Number,
@@ -70,7 +77,8 @@ namespace PrimeCalculator.CommandHandler
                 }
                 catch (Exception exception)
                 {
-                    //TODO: log
+                    _loggingManager.LogError(exception.Message);
+                    
                     await _primeLinkRepository.UpdatePrimeLinkAsync(new Models.PrimeLinkModel
                     {
                         Number = request.Number,
