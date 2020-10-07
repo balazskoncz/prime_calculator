@@ -124,8 +124,6 @@ namespace PrimeCalculator
                 context.Database.EnsureCreated();
             }
 
-            
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
