@@ -1,10 +1,16 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Polly;
+using Polly.CircuitBreaker;
 using PrimeCalculator.Commands;
 using PrimeCalculator.Dtos;
+using PrimeCalculator.Helpers;
 using PrimeCalculator.Queries;
 using RiskFirst.Hateoas;
 
@@ -17,49 +23,124 @@ namespace PrimeCalculator.Controllers
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
         private readonly ILinksService _linksService;
+        private readonly AsyncCircuitBreakerPolicy _circuitBreakerPolicy;
+        private readonly PolicyConfiguration _policyConfiguration;
 
         public PrimeController(
             IMapper mapper,
             IMediator mediator,
-            ILinksService linksService)
+            ILinksService linksService,
+            PolicyConfiguration policyConfiguration)
         {
             _mapper = mapper;
             _mediator = mediator;
             _linksService = linksService;
+            _policyConfiguration = policyConfiguration;
+
+            _circuitBreakerPolicy = Policy
+                  .Handle<TaskCanceledException>()
+                  .CircuitBreakerAsync(policyConfiguration.CircuitBreakerAllowedExceptions, TimeSpan.FromMinutes(_policyConfiguration.CircuitBreakerShutdownDurationInMinutes),
+                  (ex, t) =>
+                  {
+                      Console.WriteLine("Circuit broken!");
+                  },
+                  () =>
+                  {
+                      Console.WriteLine("Circuit Reset!");
+                  });
         }
 
         [HttpPost("CheckNumberIsPrime", Name = "CheckNumberIsPrime")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(NumberIsPrimeDto))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<NumberIsPrimeDto>> CheckNumberIsPrime(CheckNumberDto checkNumberDto) 
         {
-            var numberIsPrimeResult = await _mediator.Send(
-                new CheckNumberIsPrimeCommand 
+            try
+            {
+                bool isPrimeResult = false;
+
+                await _circuitBreakerPolicy.ExecuteAsync(async () =>
                 {
-                    Number = checkNumberDto.Number
+                    var cancelTokenSource = new CancellationTokenSource();
+                    cancelTokenSource.CancelAfter(TimeSpan.FromSeconds(_policyConfiguration.TimoutInMinutes));
+
+                    var numberIsPrimeResult = await _mediator.Send(
+                    new CheckNumberIsPrimeCommand
+                    {
+                        Number = checkNumberDto.Number
+                    }, cancelTokenSource.Token);
+
+                    isPrimeResult = numberIsPrimeResult.IsPrime;
                 });
 
-            return Ok(new NumberIsPrimeDto
+                return Ok(new NumberIsPrimeDto
+                {
+                    IsPrime = isPrimeResult
+                });
+            }
+            catch (TaskCanceledException taskCanceledException)
             {
-                IsPrime = numberIsPrimeResult.IsPrime
-            });
+                return Problem(
+                    title: "The computation runs too long. Please check back later or use a HATEOAS enabled endpoint.",
+                    detail: taskCanceledException.Message,
+                    statusCode: (int)HttpStatusCode.RequestTimeout);
+            }
+            catch (Exception exception)
+            {
+                return Problem(
+                    title: "Unexpected error. Please contact support.",
+                    detail: exception.Message,
+                    statusCode: (int)HttpStatusCode.InternalServerError);
+            }
         }
 
         [HttpPost("FindNextPrime", Name = "FindNextPrime")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(NextPrimeDto))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
         [ResponseCache(VaryByHeader = "User-Agent", Duration = 30)]
         public async Task<ActionResult<NextPrimeDto>> FindNextPrime(CheckNumberDto checkNumberDto)
         {
-            var numberIsPrimeResult = await _mediator.Send(
-                new FindNextPrimeCommand
+            try
+            {
+                int nextPrime = -1;
+
+                await _circuitBreakerPolicy.ExecuteAsync(async () =>
                 {
-                    Number = checkNumberDto.Number
+                    var cancelTokenSource = new CancellationTokenSource();
+                    cancelTokenSource.CancelAfter(TimeSpan.FromSeconds(_policyConfiguration.TimoutInMinutes));
+
+                    var numberIsPrimeResult = await _mediator.Send(
+                    new FindNextPrimeCommand
+                    {
+                        Number = checkNumberDto.Number
+                    });
+
+                    nextPrime = numberIsPrimeResult.NextPrime;
                 });
 
-            return Ok(new NextPrimeDto 
+                return Ok(new NextPrimeDto
+                {
+                    NextPrime = nextPrime
+                });
+
+            }
+            catch (TaskCanceledException taskCanceledException)
             {
-                NextPrime = numberIsPrimeResult.NextPrime
-            });
+                return Problem(
+                    title: "The computation runs too long. Please check back later or use a HATEOAS enabled endpoint.",
+                    detail: taskCanceledException.Message,
+                    statusCode: (int)HttpStatusCode.RequestTimeout);
+            }
+            catch (Exception exception)
+            {
+                return Problem(
+                    title: "Unexpected error. Please contact support.",
+                    detail: exception.Message,
+                    statusCode: (int)HttpStatusCode.InternalServerError);
+            }
         }
 
         [HttpPost("RequestPrimeCalculation", Name = "RequestPrimeCalculation")]

@@ -48,7 +48,11 @@ namespace PrimeCalculator
             var connectionStrings = new ConnectionStrings();
             Configuration.Bind("ConnectionStrings", connectionStrings);
 
+            var policyConfigurations = new PolicyConfiguration();
+            Configuration.Bind("PolicyConfiguration", policyConfigurations);
+
             services.AddSingleton(connectionStrings);
+            services.AddSingleton(policyConfigurations);
 
             var connectionString = string.Format(Configuration["ConnectionStrings:DatabaseConnection"]);
             services.AddEntityFrameworkNpgsql()
