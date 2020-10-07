@@ -45,7 +45,6 @@ namespace PrimeCalculator
                          builder.AllowAnyOrigin();
                          builder.AllowAnyMethod();
                          builder.AllowAnyHeader();
-                         builder.AllowCredentials();
                      });
              });
 
